@@ -1,0 +1,71 @@
+workflow:
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH == "production"
+
+stages:
+  - build
+  - test
+  - publish
+
+variables:
+  IMAGE: $JFROG_REGISTRY/pelotech-docker/spring-boot-prototype
+  PULL_DEMO: 2984ac4c
+
+build:
+  stage: build
+  image:
+    name: ghcr.io/graalvm/native-image:22.2.0
+    entrypoint:
+      - ""
+  # before_script:
+    # - microdnf install findutils
+  script:
+    - echo "Running build"
+    # - ./gradlew nativeCompile
+  # artifacts:
+  #   paths:
+  #     - build/
+
+test:
+  stage: test
+  script:
+    - echo "Running test"
+
+publish:
+  image: docker:20
+  stage: publish
+  dependencies:
+    - build
+  services:
+    - docker:20-dind
+  before_script:
+    - echo -n "${JFROG_API_KEY}" | docker login --username ${JFROG_USER} --password-stdin ${JFROG_REGISTRY}
+  script:
+    # - docker build
+    #   --tag $IMAGE:$CI_COMMIT_SHORT_SHA
+    #   --file ./Dockerfile
+    #   "."
+    - docker pull $IMAGE:$PULL_DEMO
+    - docker tag $IMAGE:$PULL_DEMO $IMAGE:$CI_COMMIT_SHORT_SHA
+  after_script:
+    - docker push $IMAGE:$CI_COMMIT_SHORT_SHA
+    - apk add --update curl
+    - |-
+      PAYLOAD=$(cat << JSON
+      {
+        "name": "${IMAGE}",
+        "version": "$CI_COMMIT_SHORT_SHA",
+        "type": "container",
+        "commit": "$CI_COMMIT_SHORT_SHA",
+        "ref": "refs/heads/$CI_COMMIT_REF_NAME"
+      }
+      JSON
+      )
+    - >-
+      curl
+      --request POST "https://api.humanitec.io/orgs/convera/artefact-versions"
+      --header "Authorization: Bearer $HUMANITEC_API_TOKEN"
+      --header "Content-type: application/json"
+      --data-raw "$PAYLOAD"
+
