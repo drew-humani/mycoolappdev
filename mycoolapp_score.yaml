@@ -1,0 +1,17 @@
+apiVersion: spec.paws.sh/v1alpha1
+kind: Workload
+metadata:
+  name: springbootex
+spec:
+  resources:
+    db:
+      type: postgres
+    api-dns:
+      type: dns
+  container:
+    variables:
+      CONNECTION_STRING: jdbc:postgresql://${externals.proddb.host}:${externals.proddb.port}/${externals.proddb.name}
+  routes:
+    resources.api-dns.host:
+	    /v1/users:8080
+	      match: prefix
