@@ -10,7 +10,7 @@ spec:
       type: dns
   container:
     variables:
-      CONNECTION_STRING: jdbc:postgresql://${externals.workdb.host}:${externals.workb.port}/${externals.workdb.name}
+      CONNECTION_STRING: jdbc:postgresql://${externals.workdb.host}:${externals.workdb.port}/${externals.workdb.name}
   routes:
     resources.api-dns.host:
 	    /v1/users:8080
