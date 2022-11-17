@@ -1,4 +1,4 @@
-apiVersion: spec.paws.sh/v1alpha1
+apiVersion: score.dev/v1b1
 kind: Workload
 metadata:
   name: springbootex
