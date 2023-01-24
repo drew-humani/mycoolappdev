@@ -64,7 +64,7 @@ publish:
       )
     - >-
       curl
-      --request POST "https://api.humanitec.io/orgs/convera/artefact-versions"
+      --request POST "https://api.humanitec.io/orgs/mycoolcompany/artefact-versions"
       --header "Authorization: Bearer $HUMANITEC_API_TOKEN"
       --header "Content-type: application/json"
       --data-raw "$PAYLOAD"
